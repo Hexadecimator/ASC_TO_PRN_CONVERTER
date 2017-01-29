@@ -18,6 +18,7 @@ Z1              FIDUCIAL15-30 1875  -70   90.000 U N 0 -1 0 -1 1
 .
 .
 .
+
 *********** END TEXT COPY  ***************
 
 note that the file is not expected to have dots at the bottom, that is just meant to show that this will now repeat the same pattern 1 time for each component on the board (Z1 would be component #1)
