@@ -4,7 +4,7 @@ Convert the .ASC files PADs exports to .PRN files the MyChronic MY100 Pick and P
 
 
 
-this is what the .ASC file structure is expected by the program to look like before the program can manipulate it:
+this is what .ASC file structure is expected by the program to look like before the program can manipulate it:
 
 
 *********** START TEXT COPY ***************
