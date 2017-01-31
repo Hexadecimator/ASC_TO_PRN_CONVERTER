@@ -1,3 +1,14 @@
+"""
+
+    **When exporting the file from PADs:**
+    1. Go to File->Export and choose a name for the ASCII file
+    2. In "Sections:", choose ONLY "Parts"   (<--------- this is for V2005.0, do we have to choose ANYTHING in a V2007.0? Need to test)
+    3. Units can stay as "Current"
+    4. Format should be V2007
+    5. Press "OK"
+
+"""
+
 import csv
 
 #####################################################################################################
@@ -172,19 +183,23 @@ def convert_clean_csv_to_PRN():
             continue
         # U
         if idx == 2:
-            #firstCSVRow = cleanCSVRows[0]
-            if "MILS" in cleanCSVRows[0]:
+            first_row = str(cleanCSVRows[0])
+            if first_row.find("MILS") != -1:
                 line_text = "U MILS"
                 cleanPRNRows_M.append(line_text)
                 continue
-            elif "INCHES" in cleanCSVRows[0]:
+            elif first_row.find("INCHES") != -1:
                 line_text = "U INCHES"
                 cleanPRNRows_M.append(line_text)
                 continue
-            elif "Millimeters" in cleanCSVRows[0]:
+            elif first_row.find("Millimeters") != -1:
                 line_text = "U Millimeters"
                 cleanPRNRows_M.append(line_text)
                 continue                 
+            elif first_row.find("BASIC") != -1:
+                line_text = "U BASIC"
+                cleanPRNRows_M.append(line_text)
+                continue 
             else:
                 line_text = "U Could_Not_Determine"
                 cleanPRNRows_M.append(line_text)
@@ -216,19 +231,23 @@ def convert_clean_csv_to_PRN():
             continue
         # U
         if idx == 2:
-            print(cleanCSVRows[0])
-            if "MILS" in cleanCSVRows[0]:
+            first_row = str(cleanCSVRows[0])
+            if first_row.find("MILS") != -1:
                 line_text = "U MILS"
                 cleanPRNRows_NO_M.append(line_text)
                 continue
-            elif "INCHES" in cleanCSVRows[0]:
+            elif first_row.find("INCHES") != -1:
                 line_text = "U INCHES"
                 cleanPRNRows_NO_M.append(line_text)
                 continue
-            elif "Millimeters" in cleanCSVRows[0]:
+            elif first_row.find("Millimeters") != -1:
                 line_text = "U Millimeters"
                 cleanPRNRows_NO_M.append(line_text)
-                continue                 
+                continue
+            elif first_row.find("BASIC") != -1:
+                line_text = "U BASIC"
+                cleanPRNRows_NO_M.append(line_text)
+                continue                              
             else:
                 line_text = "U Could_Not_Determine"
                 cleanPRNRows_NO_M.append(line_text)
@@ -317,39 +336,3 @@ def main():
     convert_clean_csv_to_PRN()
 
 main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
