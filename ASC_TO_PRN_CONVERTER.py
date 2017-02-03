@@ -2,10 +2,12 @@
 
     **When exporting the file from PADs:**
     1. Go to File->Export and choose a name for the ASCII file
-    2. In "Sections:", choose ONLY "Parts"   (<--------- this is for V2005.0, do we have to choose ANYTHING in a V2007.0? Need to test)
+    2. In "Sections:", choose ONLY "Parts"
     3. Units can stay as "Current"
     4. Format should be V2007
     5. Press "OK"
+    6. Re-name this .ASC file to "ORIGINAL_ASC.asc"
+    7. Deposit "ORIGINAL_ASC.asc" into this python script's working directory and run the script
 
 """
 
@@ -37,15 +39,77 @@ def clean_the_dirty_csv():
     dirtyCSVRows = []
     csvFileObj = open('ASC_to_CSV.csv')
     readerObj = csv.reader(csvFileObj)
-    for row in readerObj:
-        # Skip lines 2, 3, and 5
-        if (readerObj.line_num == 2) or (readerObj.line_num == 3) or (readerObj.line_num == 5):
+    for row in readerObj:        
+        # Hard-skip lines 2, 3, 5, 6, 7, 8
+        if (readerObj.line_num == 2) or (readerObj.line_num == 3) or (readerObj.line_num == 5) or (readerObj.line_num == 6) or (readerObj.line_num == 7) or (readerObj.line_num == 8):
             continue
+        
+        # Skip superfluous informational lines that contain "*END*"
+        skip_line = 0
+        for idx in row:
+            str_idx = str(idx)
+            if(str_idx.find("*END*") != -1):
+                skip_line = 1
+                continue
+        if (skip_line == 1):
+            skip_line = 0
+            continue        
+
+        # Skip superfluous informational lines that contain "Regular"
+        skip_line = 0
+        for idx in row:
+            str_idx = str(idx)
+            if(str_idx.find("Regular") != -1):
+                skip_line = 1
+                continue
+        if (skip_line == 1):
+            skip_line = 0
+            continue
+
+        # Skip superfluous informational lines that contain "VALUE"       
+        skip_line = 0
+        for idx in row:
+            str_idx = str(idx)
+            if(str_idx.find("VALUE") != -1):
+                skip_line = 1
+                continue
+        if (skip_line == 1):
+            skip_line = 0
+            continue
+ 
+        # Skip superfluous informational lines that contain "Ref.Des."        
+        skip_line = 0
+        for idx in row:
+            str_idx = str(idx)
+            if(str_idx.find("Ref.Des.") != -1):
+                skip_line = 1
+                continue        
+        if (skip_line == 1):
+            skip_line = 0
+            continue
+        
+        # Skip superfluous informational lines that contain "Part Type"       
+        skip_line = 0
+        for idx in row:
+            str_idx = str(idx)
+            if(str_idx.find("Type") != -1):
+                skip_line = 1
+                continue        
+        if (skip_line == 1):
+            skip_line = 0
+            continue
+        
+        # Skip blank lines
+        if not row:
+            continue
+        
         # Now create the SUPER list from this reader object which essentially copies 
-        # the contents of the whole CSV file into a list(array) in memory called "cleanCSVRows[]"
+        # the contents of the whole CSV file into a list(array) in memory called "dirtyCSVRows[]"
         dirtyCSVRows.append(row)
     csvFileObj.close()
 
+#    for row in dirtyCSVRows:
+#        print(str(row))
     
     row_count = 0 # row_count is essentially just a counter in the upcoming for loop
     deletion_index = [] # deletion_index is a generic array we're going to use to clean bad elements out of our other arrays
@@ -54,7 +118,7 @@ def clean_the_dirty_csv():
             ## Get rid of any trash elements left behind from the ASC generator
             if "*REMARK*" in field:
                 row.remove(field)
-                    
+                
             # The first row will always be a header row and the only
             # information we want to keep from here is the first cell
             # which contains the unit information (INCHES, MILLs or Millimeters)
@@ -70,13 +134,15 @@ def clean_the_dirty_csv():
         # for each row, delete the unused columns (GLUE(5), ALT(7), CLSTID(8), CLSTATTR(9), BROTHERID(10), LABELS(11))
         if (row_count >= 1):
             # delete the columns backwards so we can hard-code the row orders
+            # REFNM PTYPENM X Y ORI GLUE MIRROR ALT CLSTID CLSTATTR BROTHERID LABELS
+
             del row[11] # delete LABEL data   
             del row[10] # delete BROTHERID data
             del row[9]  # delete CLSTATTR data
             del row[8]  # delete CLSTID data
             del row[7]  # delete ALT data
             del row[5]  # delete GLUE data
-        
+
         # Increment the counter object        
         row_count += 1
     
@@ -185,21 +251,25 @@ def convert_clean_csv_to_PRN():
         if idx == 2:
             first_row = str(cleanCSVRows[0])
             if first_row.find("MILS") != -1:
-                line_text = "U MILS"
+                line_text = "U 1I"
                 cleanPRNRows_M.append(line_text)
                 continue
             elif first_row.find("INCHES") != -1:
-                line_text = "U INCHES"
+                # Code for INCHES is 1000I
+                line_text = "U 1000I"
                 cleanPRNRows_M.append(line_text)
                 continue
             elif first_row.find("Millimeters") != -1:
-                line_text = "U Millimeters"
+                line_text = "U 1000"
                 cleanPRNRows_M.append(line_text)
                 continue                 
-            elif first_row.find("BASIC") != -1:
-                line_text = "U BASIC"
+            elif first_row.find("Micrometers") != -1:
+                line_text = "U 1"
                 cleanPRNRows_M.append(line_text)
                 continue 
+            elif first_row.find("BASIC") != -1:
+                line_text = "U BASIC!!!"
+                cleanPRNRows_M.append(line_text)
             else:
                 line_text = "U Could_Not_Determine"
                 cleanPRNRows_M.append(line_text)
@@ -233,19 +303,24 @@ def convert_clean_csv_to_PRN():
         if idx == 2:
             first_row = str(cleanCSVRows[0])
             if first_row.find("MILS") != -1:
-                line_text = "U MILS"
+                line_text = "U 1I"
                 cleanPRNRows_NO_M.append(line_text)
                 continue
             elif first_row.find("INCHES") != -1:
-                line_text = "U INCHES"
+                # Code for INCHES is 1000I
+                line_text = "U 1000I"
                 cleanPRNRows_NO_M.append(line_text)
                 continue
             elif first_row.find("Millimeters") != -1:
-                line_text = "U Millimeters"
+                line_text = "U 1000"
+                cleanPRNRows_NO_M.append(line_text)
+                continue
+            elif first_row.find("Micrometers") != -1:
+                line_text = "U 1"
                 cleanPRNRows_NO_M.append(line_text)
                 continue
             elif first_row.find("BASIC") != -1:
-                line_text = "U BASIC"
+                line_text = "U BASIC!!!"
                 cleanPRNRows_NO_M.append(line_text)
                 continue                              
             else:
